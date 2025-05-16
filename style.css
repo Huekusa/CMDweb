@@ -1,0 +1,30 @@
+@charset "utf-8";
+body{
+    background-color: black;
+    color: white;
+    margin: 0;
+    font-family: Consolas, monospace;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.terminal{
+    padding: 20px;
+}
+
+.line{
+    white-space: pre;
+}
+
+.input{
+    background-color: black;
+    border: none;
+    color: white;
+    outline: none;
+}
+
+@keyframes blink{
+    50% {
+        background-color: transparent;
+    }
+}
