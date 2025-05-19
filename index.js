@@ -1,100 +1,140 @@
-const terminal = document.getElementById("terminal");
+const terminal = document.getElementById('terminal');
 const defaultLines = [
-    "Connecting MyPage",
-    "Loading[■■■■■■■■■■]100%",
-    "Complete Connect",
-    "Enter your order"
+    'Connecting MyPage',
+    'Loading[■■■■■■■■■■]100%',
+    'Complete Connect',
+    'Enter your order'
 ];
 
-let lineIndex = 0;
-let currentDir = "C:\\Users\\Guest>";
+let currentDir = 'C:\\Users\\Guest>';
+const users = {};
 
-function typeLine(lines) {
-    if (lineIndex >= lines.length) {
-        inputPrompt();
-        return;
-    }
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    const fullLine = lines[lineIndex];
-    const lineElement = document.createElement("div");
-    lineElement.className = "line";
-    terminal.appendChild(lineElement);
+async function typeLine(texts, textsIndex = 0) {
+    if (Array.isArray(texts)) {
+        if(textsIndex >= texts.length) return;
 
-    let i = 0;
-    function typeChar() {
-        lineElement.textContent += fullLine[i++];
-        
-        if (i < fullLine.length) {
-            setTimeout(typeChar, 30);
-        }else{
-            lineIndex++;
-            setTimeout(typeLine(lines), 300);
+        const text = texts[textsIndex]
+        const textElement = document.createElement('div');
+        textElement.className = 'line';
+        terminal.appendChild(textElement);
+
+        for (let i = 0; i < text.length; i++) {
+            textElement.textContent += text[i];
+            await delay(30);
+        }
+
+        await delay(250);
+        await typeLine(texts, textsIndex + 1);
+    }else if (typeof texts === 'string') {
+        const textElement = document.createElement('div');
+        textElement.className = 'line';
+        terminal.appendChild(textElement);
+
+        for (let i = 0; i < texts.length; i++) {
+            textElement.textContent += texts[i];
+            await delay(30);
         }
     }
-    typeChar();
 }
 
 function inputPrompt() {
-    const inputLine = document.createElement("div");
-    inputLine.className = "input-line";
+    const inputLine = document.createElement('div');
+    inputLine.className = 'input-line';
 
-    const prompt = document.createElement("span");
+    const prompt = document.createElement('span');
     prompt.textContent = currentDir;
     inputLine.appendChild(prompt);
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "input";
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'input';
     inputLine.appendChild(input);
 
     terminal.appendChild(inputLine);
     input.focus();
 
-    input.addEventListener("keydown", function(e) {
-        if(e.key === "Enter") {
+    input.addEventListener('keydown', async function(e) {
+        if(e.key === 'Enter') {
             const userInput = input.value;
             inputLine.remove();
     
-            const executedLine = document.createElement("div");
-            executedLine.className = "line";
-            executedLine.textContent = currentDir + " " + userInput;
+            const executedLine = document.createElement('div');
+            executedLine.className = 'line';
+            executedLine.textContent = currentDir + ' ' + userInput;
             terminal.appendChild(executedLine);
 
-            cheakInputLine(userInput);
+            await cheakInputLine(userInput);
 
-            inputPrompt();
         }
     });
 
 }
-function cheakInputLine(userInput) {
-    const returnLine = document.createElement("div");
-    returnLine.className = "line";
-    const [base, ...args] = userInput.split(" ");
+
+async function cheakInputLine(userInput) {
+    const [base, ...args] = userInput.split(' ');
 
     switch (base.toLowerCase()) {
-        case "now":
+        case 'now':
             const now = new Date();
             now.setTime(now.getTime() - now.getTimezoneOffset() * 60 * 1000);
-            const formattedNow = now.toISOString().replace("T", " ").substring(0,19);
-            returnLine.textContent = formattedNow;
+            const formattedNow = now.toISOString().replace('T', ' ').substring(0,19);
+            await typeLine(formattedNow);
         break;
             
-        case "help":
+        case 'help':
             const helpText = [
-                "now 今日の日時を表示します",
-                "echo [TEXT] TEXTを表示します"
+                'help           使用できるコマンドを表示します',
+                'login [user]   userでログインします',
+                'echo [TEXT]    TEXTを表示します',
+                'now            今日の日時を表示します'
             ];
-            // helpText.forEach(line => )
-            // returnLine.textContent = helpText;
+            await typeLine(helpText);
         break;
 
-        case "echo":
-            returnLine.textContent = args.join(" ");
+        case 'echo':
+            await typeLine(args.join(' '));
         break;
-        default:break;
+
+        case 'register':
+            if (argsTrimed.length !== 2) {
+                break;
+            }
+            const [username, password] = argsTrimed;
+
+            if (!users[username]) {
+                await typeLine("error");
+            }else {
+                users[username] = password;
+            }
+        break;
+
+        case 'login':
+            const argsTrimed = args.map(arg => arg.trim()).filter(arg => arg.length > 0);
+            if (argsTrimed.length === 0) {
+                await typeLine("error");
+            }else if (argsTrimed.length > 1) {
+                await typeLine("error2");
+            }else {
+                const username = argsTrimed[0];
+                currentDir = 'C:\\Users\\'+ username +'>';
+            }
+        break;
+
+        default:
+            await typeLine([
+                '存在しないコマンドです',
+                '使用できるコマンドはhelpで確認できます'
+            ]);
+        break;
     }
-    terminal.appendChild(returnLine);
+    inputPrompt();
 }
 
-typeLine(defaultLines);
+(async function startTerminal() {
+    await typeLine(defaultLines);
+    inputPrompt();
+})();
