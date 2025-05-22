@@ -8,6 +8,8 @@ const defaultLines = [
 
 let currentDir = 'C:\\Users\\Guest>';
 const users = {};
+users.guest = 'pass';
+users.root = 'rootpass';
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -67,16 +69,17 @@ function inputPrompt() {
             executedLine.textContent = currentDir + ' ' + userInput;
             terminal.appendChild(executedLine);
 
-            await cheakInputLine(userInput);
+            await checkInputLine(userInput);
 
         }
     });
-
+    
 }
 
-async function cheakInputLine(userInput) {
+async function checkInputLine(userInput) {
     const [base, ...args] = userInput.split(' ');
-
+    const argsTrimed = args.map(arg => arg.trim()).filter(arg => arg.length > 0);
+    
     switch (base.toLowerCase()) {
         case 'now':
             const now = new Date();
@@ -88,8 +91,12 @@ async function cheakInputLine(userInput) {
         case 'help':
             const helpText = [
                 'help           使用できるコマンドを表示します',
-                'login [user]   userでログインします',
+                'register [username] [password]',
+                '               ユーザーを新規登録します',
+                'login [username] [password]',
+                '               ユーザーでログインします',
                 'echo [TEXT]    TEXTを表示します',
+                'clear          画面をクリアします',
                 'now            今日の日時を表示します'
             ];
             await typeLine(helpText);
@@ -101,27 +108,47 @@ async function cheakInputLine(userInput) {
 
         case 'register':
             if (argsTrimed.length !== 2) {
+                await typeLine('Usage: register [username] [password]')
                 break;
             }
-            const [username, password] = argsTrimed;
+            const [regUser, regPass] = argsTrimed;
 
-            if (!users[username]) {
-                await typeLine("error");
+            if (users[regUser]) {
+                await typeLine('This user is already registered');
             }else {
-                users[username] = password;
+                users[regUser] = regPass;
+                await typeLine('Success register')
             }
         break;
 
         case 'login':
-            const argsTrimed = args.map(arg => arg.trim()).filter(arg => arg.length > 0);
-            if (argsTrimed.length === 0) {
-                await typeLine("error");
-            }else if (argsTrimed.length > 1) {
-                await typeLine("error2");
-            }else {
-                const username = argsTrimed[0];
-                currentDir = 'C:\\Users\\'+ username +'>';
+            if (argsTrimed.length !== 2) {
+                await typeLine('Usage: login [username] [password]');
+                break;
             }
+            const [loginUser, loginpass] = argsTrimed;
+
+            if (!users[loginUser]) {
+                await typeLine('This user is not registered');
+                break;
+            }else if (users[loginUser] !== loginpass) {
+                await typeLine('Incorrect password');
+                break;
+            }else{
+                currentDir = 'C:\\Users\\'+ loginUser +'>';
+                await typeLine('Login successful');
+            }
+            
+        break;
+
+        case 'logout':
+        case 'exit':
+            currentDir = 'C:\\Users\\Guest>';
+            await typeLine('Logouted');
+        break;
+
+        case 'clear':
+            terminal.innerHTML = ' ';
         break;
 
         default:
