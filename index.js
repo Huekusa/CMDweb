@@ -1,4 +1,5 @@
 const terminal = document.getElementById('terminal');
+const screenElement = document.getElementById('screen')
 const defaultLines = [
     'Connecting MyPage',
     'Loading[■■■■■■■■■■]100%',
@@ -70,11 +71,42 @@ function inputPrompt() {
             terminal.appendChild(executedLine);
 
             await checkInputLine(userInput);
+        }else if (e.key === 'Tab') { //Tab補完機能
+            e.preventDefault(); //Tabデフォルト機能無効化
 
+            const inputValue = input.value.trim();
+            const inputParts = inputValue.split(/\s+/);
+            const baseCommand = inputParts[0]?.toLowerCase();
+            const currentArg = inputParts[inputParts.length - 1]
+            if (inputParts.length === 1) {
+                const matches = Commands.filter(cmd => cmd.startsWith(baseCommand))
+                if (matches.length === 1) {
+                    input.value = matches[0] + ' ';
+                }
+            }else if (['login', 'register'].includes(baseCommand)) {
+                if (inputParts.length === 2) {
+                    const matches = Object.keys(users).filter(user => user.startsWith(currentArg));
+                    if (matches.length === 1) {
+                        inputParts[1] = matches[0];
+                        input.value = inputParts.join(' ') + ' ';
+                    }
+                }
+            }
         }
     });
-    
 }
+
+
+const Commands = [
+    'now',
+    'help',
+    'register',
+    'login',
+    'logout',
+    'exit',
+    'clear',
+    'echo'
+]
 
 async function checkInputLine(userInput) {
     const [base, ...args] = userInput.split(' ');
@@ -160,6 +192,7 @@ async function checkInputLine(userInput) {
     }
     inputPrompt();
 }
+
 
 (async function startTerminal() {
     await typeLine(defaultLines);
