@@ -1,33 +1,33 @@
 @charset "utf-8";
 body{
-    background-color: black;
-    color: white;
-    margin: 0;
-    font-family: Consolas, monospace;
-    font-size: 16px;
-    line-height: 1.5;
+	background-color: black;
+	color: white;
+	margin: 0;
+	font-family: Consolas, monospace;
+	font-size: 16px;
+	line-height: 1.5;
 }
 
 .terminal{
-    padding: 20px;
+	padding: 20px;
 }
 
 .line{
-    white-space: pre;
+	white-space: pre;
 }
 
 .input{
-    background-color: black;
-    border: none;
-    color: white;
-    outline: none;
-    font-family: Consolas, monospace;
-    font-size: 16px;
-    line-height: 1.5;
+	background-color: black;
+	border: none;
+	color: white;
+	outline: none;
+	font-family: Consolas, monospace;
+	font-size: 16px;
+	line-height: 1.5;
 }
 
 @keyframes blink{
-    50% {
-        background-color: transparent;
-    }
+	50% {
+		background-color: transparent;
+	}
 }
