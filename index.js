@@ -226,7 +226,7 @@ async function checkInputLine(userInput) {
 
 (async function startTerminal() {
 	const savedUser = getCookie('username');
-	const savedPass = getCookie('usepass')
+	const savedPass = getCookie('userpass');
 	if (savedUser && savedPass && users[savedUser] === savedPass) {
 		currentUser = savedUser;
 		await typeLine([
