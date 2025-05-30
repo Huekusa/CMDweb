@@ -25,6 +25,31 @@ function getCurrentDir() {
 	return `C:\\Users\\${currentUser}>`;
 }
 
+/*
+*Cookie設定
+*/
+function setCookie(name, value, days = 7) {
+	const expires = new Date(Date.now() + days * 864e5).toUTCString();
+	document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
+
+function getCookie(name) {
+	return document.cookie.split('; ').reduce((r, v) => {
+		const parts = v.split('=');
+		return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+	}, '');
+}
+
+function deleteCookie(name) {
+	document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+}
+
+
+/**
+ * テキスト入力アニメーション
+ * @param {*} text 
+ * @param {*} speed 
+ */
 async function printLine(text, speed = 30) {
 	const textElement = document.createElement('div');
 	textElement.className = 'line';
@@ -170,13 +195,17 @@ async function checkInputLine(userInput) {
 				break;
 			}else{
 				currentUser = loginUser;
+				setCookie('username', loginUser);
+				setCookie('userpass', loginPass);
 				await typeLine('Login successful');
 			}
 		break;
 
 		case 'logout':
 		case 'exit':
-			currentUser = 'Guest';
+			currentUser = 'guest';
+			deleteCookie('username');
+			deleteCookie('userpass');
 			await typeLine('Logged out');
 		break;
 
@@ -196,6 +225,16 @@ async function checkInputLine(userInput) {
 
 
 (async function startTerminal() {
-	await typeLine(defaultLines);
+	const savedUser = getCookie('username');
+	const savedPass = getCookie('usepass')
+	if (savedUser && savedPass && users[savedUser] === savedPass) {
+		currentUser = savedUser;
+		await typeLine([
+			`Welcome back, ${savedUser}`,
+			'Auto-login successful'
+		]);
+	} else {
+		await typeLine(defaultLines);
+	}
 	inputPrompt();
 })();
